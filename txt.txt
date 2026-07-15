@@ -1,0 +1,1 @@
+as={Link} to="/...." permet d'eviter le rechargement complet de la page
