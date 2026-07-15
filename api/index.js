@@ -6,23 +6,19 @@ import authRouter from "./routes/auth.route.js"
 
 dotenv.config()
 
-// mongoose.
-//         connect(process.env.MONGO)
-//         .then(() => console.log('MongoDB is connected'))
-//         .catch((err) => {
-//             console.error(err)
-//         })
+mongoose.
+        connect(process.env.MONGO)
+        .then(() => console.log('MongoDB is connected'))
+        .catch((err) => {
+            console.error(err)
+        })
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-/**
- * 
- * Middleware
- * 
- */
 
 app.use(express.json())
+
 
 
 /**
@@ -33,6 +29,23 @@ app.use(express.json())
 
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
+
+/**
+ * 
+ * Middleware
+ * 
+ */
+app.use((err, req, res, next) => {
+    
+    const statusCode = err.statusCode || 500
+    const message = err.message || 'Une Erreur server est survenue.'
+
+    return res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message 
+    })
+})
 
 /**
  * 
