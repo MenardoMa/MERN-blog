@@ -32,7 +32,7 @@ const Header = () => {
                 <FaMoon />
             </Button>
             <Link to="sign-in">
-                <Button className="cursor-pointer" color="purple">
+                <Button className="cursor-pointer" color="purple" outline>
                     Sign In
                 </Button>
             </Link>
