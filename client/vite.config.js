@@ -10,4 +10,12 @@ export default defineConfig({
     tailwindcss(),
     flowbiteReact()
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        secure: false
+      }
+    }
+  }
 })
