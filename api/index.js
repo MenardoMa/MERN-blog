@@ -6,12 +6,12 @@ import authRouter from "./routes/auth.route.js"
 
 dotenv.config()
 
-// mongoose.
-//         connect(process.env.MONGO)
-//         .then(() => console.log('MongoDB is connected'))
-//         .catch((err) => {
-//             console.error(err)
-//         })
+mongoose.
+        connect(process.env.MONGO)
+        .then(() => console.log('MongoDB is connected'))
+        .catch((err) => {
+            console.error(err)
+        })
 
 const app = express()
 const PORT = process.env.PORT || 3000
