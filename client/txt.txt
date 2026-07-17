@@ -1,1 +1,6 @@
 as={Link} to="/...." permet d'eviter le rechargement complet de la page
+
+Redux Toolkkit :
+
+Nous devons : Install Redux Toolkit and React-Redux
+              Nous devons installer ca depuis notre frontend
