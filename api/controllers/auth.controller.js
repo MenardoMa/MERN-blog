@@ -90,6 +90,14 @@ export const signin = async (req, res, next) => {
 }
 
 
+/**
+ * 
+ * Google Auth method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 export const google = async (req, res, next) => {
 
     const { email, name, googlePhotoUrl } = req.body;

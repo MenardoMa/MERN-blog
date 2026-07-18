@@ -1,11 +1,29 @@
-import { Button, Navbar, NavbarCollapse, NavbarLink, NavbarToggle, TextInput  } from "flowbite-react";
+import { 
+    Avatar, 
+    Button, 
+    Dropdown, 
+    DropdownHeader, 
+    Navbar, 
+    NavbarCollapse, 
+    NavbarLink, 
+    NavbarToggle, 
+    TextInput, 
+    DropdownItem,
+    DropdownDivider  
+} from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { FaMoon } from "react-icons/fa";
+import { FaMoon, FaSun } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
+
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleTheme } from "../redux/theme/themeSlice.js"
 
 const Header = () => {
 
   const path = useLocation().pathname
+  const dispatch = useDispatch()
+  const { currentUser } = useSelector(state => state.user )
+  const { theme } = useSelector(state => state.theme)
 
   return (
     <Navbar className="border-b-2">
@@ -28,14 +46,55 @@ const Header = () => {
             <AiOutlineSearch />
         </Button>
         <div className="flex gap-2 md:order-2">
-            <Button className="w-12 h-10 hidden sm:inline cursor-pointer" color="gray" pill>
-                <FaMoon />
+            <Button className="w-12 h-10 hidden sm:inline cursor-pointer" color="gray" pill
+                onClick={() => dispatch(toggleTheme())}
+            >
+                {
+                    theme === "light"  ? <FaMoon /> : <FaSun />
+                }
             </Button>
-            <Link to="sign-in">
-                <Button className="cursor-pointer" color="purple" outline>
-                    Sign In
-                </Button>
-            </Link>
+            {
+                currentUser ? 
+                <>
+                    <Dropdown
+                        arrowIcon={false}
+                        inline
+                        label={
+                            <Avatar
+                                className="cursor-pointer"
+                                rounded
+                                alt="user"
+                                img={currentUser.profilePicture}
+                            />
+                        }
+                    >
+                        <DropdownHeader>
+                            <span className="block text-sm">{currentUser.username}</span>
+                            <span className="block truncate text-sm font-medium">{currentUser.email}</span>
+                        </DropdownHeader>
+                            <Link to="/dashboard?tab=profile">
+                                <DropdownItem>
+                                    Profile
+                                </DropdownItem>
+                            </Link>
+                            <DropdownDivider />
+                            <Link to="/dashboard?tab=profile">
+                                <DropdownItem>
+                                    Sign out
+                                </DropdownItem>
+                            </Link>
+                    </Dropdown>
+                </> 
+                : 
+                <>
+                    <Link to="sign-in">
+                        <Button className="cursor-pointer" color="purple" outline>
+                            Sign In
+                        </Button>
+                    </Link>
+                </>
+            }
+            
             <NavbarToggle />
         </div>
         <NavbarCollapse>
