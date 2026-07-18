@@ -4,3 +4,24 @@ Redux Toolkkit :
 
 Nous devons : Install Redux Toolkit and React-Redux
               Nous devons installer ca depuis notre frontend
+              Pour persister les données nous devons installer :
+              Redux-persist 
+
+Pour Gerer l'authentification Google nous devons passer par firebase :
+            avoir un compte et passer par Go to console
+
+            Tu creer un projet
+            Tu ajoute l'applicaation
+            Tu install firebase coté client : npm install firebase
+
+            Apres Installation nous devons creer un fichier firebase.js
+            A laquelle nous allons y collé notre configuration
+
+            Apres avoir creer et recuperer le key :
+
+            Tu clique sur securité => authentification => commencer 
+            Tu choisix Google (une fois sur l'interface tu coche :  Activer )
+            et tu mets le nom de ton projet (dans Npm public du projet) et
+            tu choisis l'adresse e-mail ( dans adresse e-mail )
+
+            Si Tout se passe bien tu verras Etat : Activé
