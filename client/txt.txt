@@ -25,3 +25,7 @@ Pour Gerer l'authentification Google nous devons passer par firebase :
             tu choisis l'adresse e-mail ( dans adresse e-mail )
 
             Si Tout se passe bien tu verras Etat : Activé
+
+Pour stocker les images nous allons utiliser firebase aussi : storage
+
+    Donc dans mon compte firebase > bases de données et storage > storage
