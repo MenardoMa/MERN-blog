@@ -6,8 +6,8 @@ export const uploadImage = async (req, res, next) => {
 
         if(!req.file){
             return res.status(400).json({
-                success:false,
-                message:"Image obligatoire"
+                success: false,
+                message: "Image obligatoire"
             });
         }
 
@@ -19,17 +19,17 @@ export const uploadImage = async (req, res, next) => {
                 folder:`mern-blog/${folder}`,
                 transformation:[
                     {
-                        quality:"auto",
-                        fetch_format:"auto"
+                        quality: "auto",
+                        fetch_format: "auto"
                     }
                 ]
             }
         );
 
         res.status(200).json({
-            success:true,
-            url:result.secure_url,
-            public_id:result.public_id
+            success: true,
+            url: result.secure_url,
+            public_id: result.public_id
         });
 
     } catch(error){
