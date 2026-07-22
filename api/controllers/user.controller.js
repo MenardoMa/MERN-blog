@@ -108,6 +108,15 @@ export const updateUser = async (req, res, next) => {
     }
 };
 
+
+/**
+ * Delete account user method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
 export const deleteUser = async (req, res, next) => {
     try {
 
@@ -135,3 +144,25 @@ export const deleteUser = async (req, res, next) => {
         return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
     }
 };
+
+
+/**
+ * signout method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const signout = async (req, res, next) => {
+    try {
+        res
+            .clearCookie("access_token")
+            .status(200)
+            .json({
+            message: "Vous etes deconnecté."
+        });
+    } catch (error) {
+        return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
+    }
+}
