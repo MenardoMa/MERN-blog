@@ -8,13 +8,20 @@ import {
 } from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { uploadStart, uploadSuccess, uploadFailure } from "../redux/user/userSlice.js"
+import { 
+  uploadStart, 
+  uploadSuccess, 
+  uploadFailure,
+  deleteUserStart,
+  deleteUserFailure,
+  deleteUserSuccess,
+} from "../redux/user/userSlice.js"
 import { useDispatch } from "react-redux"
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 const DashProfile = () => {
   
-  const { currentUser } = useSelector(state => state.user)
+  const { currentUser, error } = useSelector(state => state.user)
   const [imageFile, setImageFile] = useState(null)
 
   const [previewUrl, setPreviewUrl] = useState(null)
@@ -170,10 +177,34 @@ const DashProfile = () => {
   }
 
   // DELETE A COMPTE
-  const handlerDeleteUser = (e) => {
+  const handlerDeleteUser = async (e) => {
     e.preventDefault()
-    console.log("ok")
     setShowModel(false)
+
+    try {
+
+      dispatch(deleteUserStart())
+
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      })
+
+      const data = await res.json()
+
+      if(!res.ok){
+        dispatch(deleteUserFailure(data.message))
+      }else{
+        dispatch(deleteUserSuccess(data))
+      }
+
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message))
+    }
+
+
   }
 
 
@@ -225,6 +256,13 @@ const DashProfile = () => {
             updateUserError && (
               <Alert color="failure">
                 {updateUserError}
+              </Alert>
+            )
+          }
+          {
+            error && (
+              <Alert color="failure">
+                {error}
               </Alert>
             )
           }
