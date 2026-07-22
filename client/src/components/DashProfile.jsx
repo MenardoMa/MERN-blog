@@ -1,8 +1,16 @@
-import { Button, TextInput, Alert } from "flowbite-react";
+import { 
+  Button, 
+  TextInput, 
+  Alert, 
+  Modal, 
+  ModalBody, 
+  ModalHeader 
+} from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { uploadStart, uploadSuccess, uploadFailure } from "../redux/user/userSlice.js"
 import { useDispatch } from "react-redux"
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 const DashProfile = () => {
   
@@ -21,6 +29,8 @@ const DashProfile = () => {
 
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null)
   const [updateUserError, setUpdateUserError] = useState(null)
+
+  const [showModal, setShowModel] = useState(false)
 
   const filePickerRef = useRef()
   const dispatch = useDispatch()
@@ -159,6 +169,14 @@ const DashProfile = () => {
 
   }
 
+  // DELETE A COMPTE
+  const handlerDeleteUser = (e) => {
+    e.preventDefault()
+    console.log("ok")
+    setShowModel(false)
+  }
+
+
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
@@ -239,9 +257,45 @@ const DashProfile = () => {
             </Button>
         </form>
         <div className="mt-5 text-red-500 flex justify-between">
-          <span className="cursor-pointer">Delete account</span>
+          <span 
+              className="cursor-pointer" 
+              onClick={() => setShowModel(true)}
+            >
+              Delete account
+            </span>
           <span className="cursor-pointer">Sign out</span>
         </div>
+
+
+        <Modal show={showModal} size="md" onClose={() => setShowModel(false)} popup>
+          <ModalHeader />
+          <ModalBody>
+            <div className="text-center">
+              <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                 Êtes-vous sûr de vouloir supprimer ce produit ?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Button 
+                  color="red" 
+                  className="cursor-pointer"
+                  onClick={handlerDeleteUser}
+                >
+                  Oui, je suis sûr
+                </Button>
+                <Button 
+                  color="alternative" 
+                  className="cursor-pointer"
+                  onClick={() => setShowModel(false)}
+                >
+                  Non, annuler
+                </Button>
+              </div>
+            </div>
+          </ModalBody>
+      </Modal>
+
+
     </div>
   )
 }
