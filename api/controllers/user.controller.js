@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import cloudinary from '../config/cloudinary.js';
 import { errorHandler } from '../utils/error.js';
 import bcryptjs from 'bcryptjs';
 
@@ -16,21 +17,30 @@ export const test = (req, res) => {
  */
 export const updateUser = async (req, res, next) => {
     try {
-        
-        if(req.user.id !== req.params.userId){
-            return next(errorHandler(403, 'Vous n\'etes pas autorisiré a modifier ce profile'))
+
+        if (req.user.id !== req.params.userId) {
+            return next(errorHandler(403, "Vous n'êtes pas autorisé à modifier ce profil."));
         }
 
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return next(errorHandler(404, "Utilisateur introuvable."));
+        }
+
+        const updateData = {};
+
+        // PASSWORD
         if (req.body.password !== undefined) {
+
             const password = req.body.password.trim();
             if (password.length < 6) {
-                return next(
-                    errorHandler(400, "Le mot de passe doit contenir au moins 6 caractères.")
-                );
+                return next(errorHandler(400, "Le mot de passe doit contenir au moins 6 caractères."));
             }
-            req.body.password = bcryptjs.hashSync(password, 10);
+            updateData.password = bcryptjs.hashSync(password, 10);
         }
 
+        // USERNAME
         if (req.body.username !== undefined) {
 
             const username = req.body.username.trim();
@@ -55,24 +65,45 @@ export const updateUser = async (req, res, next) => {
                 return next(errorHandler(400, "Le username ne peut contenir que des lettres minuscules et des chiffres."));
             }
 
-            req.body.username = username;
+            updateData.username = username;
         }
 
-        const updateUser = await User.findByIdAndUpdate(req.params.userId, {
-            $set: {
-                username: req.body.username,
-                email: req.body.email,
-                profilePicture: req.body.profilePicture,
-                password: req.body.password,
+        // EMAIL
+        if (req.body.email !== undefined) {
+            updateData.email = req.body.email;
+        }
+
+        // PHOTO
+        let oldProfilePictureId = null;
+
+        if (req.body.profilePicture && req.body.profilePictureId) {
+
+            updateData.profilePicture = req.body.profilePicture;
+            updateData.profilePictureId = req.body.profilePictureId;
+
+            oldProfilePictureId = user.profilePictureId;
+        }
+
+        // Mise à jour MongoDB
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.userId,
+            { 
+                $set: updateData 
             },
-        },{ new: true });
+            { 
+                new: true 
+            }
+        );
 
-        const { password, ...rest } = updateUser._doc 
+        // Suppression de l'ancien avatar APRÈS la mise à jour
+        if (oldProfilePictureId && oldProfilePictureId !== req.body.profilePictureId) {
+            await cloudinary.uploader.destroy(oldProfilePictureId);
+        }
 
-        res.status(200).json( rest )
-
+        const { password, ...rest } = updatedUser._doc;
+        res.status(200).json(rest);
 
     } catch (error) {
-        return next(errorHandler(500, 'Une erreur interne est survenue. '+ error.message))
+        return next(errorHandler(500, 'Une erreur interne est survenue. '+ error.message));
     }
-}
+};

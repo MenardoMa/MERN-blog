@@ -1,6 +1,8 @@
 import { Button, TextInput, Alert } from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { uploadStart, uploadSuccess, uploadFailure } from "../redux/user/userSlice.js"
+import { useDispatch } from "react-redux"
 
 const DashProfile = () => {
   
@@ -8,14 +10,20 @@ const DashProfile = () => {
   const [imageFile, setImageFile] = useState(null)
 
   const [previewUrl, setPreviewUrl] = useState(null)
-  const [uploadError, setUploadError] = useState(false)
 
   const [imageFileUploading, setImageFileUploading] = useState(false);
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
 
   const [imageFileUploadSuccess, setImageFileUploadSuccess] = useState(null);
 
+  const [isImageChanged, setIsImageChanged] = useState(false);
+  const [userFormData, setFormData] = useState({})
+
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null)
+  const [updateUserError, setUpdateUserError] = useState(null)
+
   const filePickerRef = useRef()
+  const dispatch = useDispatch()
 
   const hanlerImageChange = (e) => {
 
@@ -24,7 +32,7 @@ const DashProfile = () => {
     if(file){
       setImageFile(file)
       setPreviewUrl(URL.createObjectURL(file));
-      setUploadError(false);
+      setIsImageChanged(true); // une nouvelle image a été choisie
     }
 
   }
@@ -43,6 +51,7 @@ const DashProfile = () => {
     };
   }, [previewUrl]);
 
+  // UPDATE IMAGE FROM Cloudinary
   const uploadImage = async () => {
     
     try {
@@ -72,17 +81,23 @@ const DashProfile = () => {
           setImageFileUploadError(
               uploadData.message || "Erreur lors de l'upload."
           );
+          
           setPreviewUrl(null);
+          setIsImageChanged(false); // on débloque le bouton
           return;
       }
 
-       setImageFileUploadSuccess("Image envoyée avec succès.");
+      setImageFileUploadSuccess("Image charger avec succès.");
+      // Si la personne change sa photo on aura ce deux infos.
+      setFormData(
+        {
+          ...userFormData, 
+          profilePicture: uploadData.url, 
+          profilePictureId: uploadData.public_id
+        }
+      )
 
-        console.log(uploadData);
-
-        // Ici tu pourras ensuite appeler
-        // PUT /api/user/update
-        // pour enregistrer uploadData.url dans MongoDB
+      setIsImageChanged(false);
 
     } catch (error) {
         
@@ -91,15 +106,64 @@ const DashProfile = () => {
             error.message || "Une erreur est survenue."
         );
         setPreviewUrl(null);
-
+        setIsImageChanged(false); // on débloque le bouton
     }
 
   }
 
+  // UPDATE USER INFO CHANGE VALUE
+  const handlerChange = (e) => {
+    setFormData({ ...userFormData, [e.target.id]: e.target.value })
+  }
+
+  // UPDATE USER INFO
+  const hanlerSubmit = async (e) => {
+    e.preventDefault()
+
+    setUpdateUserError(null)
+    setUpdateUserSuccess(null)
+
+    if(Object.keys(userFormData).length === 0){
+      setUpdateUserError("Veuillez changé l'une des informations.")
+      return
+    }
+
+    try {
+
+      dispatch(uploadStart())
+
+      const res = await fetch(`/api/user/update/${currentUser._id}`, 
+        {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(userFormData)
+        }
+      )
+
+      const data = await res.json()
+
+      if( !res.ok ){
+        dispatch(uploadFailure(data.message))
+        setUpdateUserError(data.message)
+      }else{
+        dispatch(uploadSuccess(data))
+        setUpdateUserSuccess("User profile mise a jour")
+      }
+
+    } catch (error) {
+      dispatch(uploadFailure(error.message))
+      setUpdateUserError(error.message)
+    }
+
+  }
+
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
         <h1 className="text-center my-7 font-semibold text-3xl">Profile</h1>
-        <form action="" className="flex flex-col gap-4">
+        <form action="" className="flex flex-col gap-4" onSubmit={hanlerSubmit}>
           <input type="file" accept="image/*" onChange={hanlerImageChange} ref={filePickerRef} hidden />
           <div className="w-32 h-32 self-center shadow-md overflow-hidden rounded-full cursor-pointer"
             onClick={() => filePickerRef.current.click()}
@@ -113,7 +177,7 @@ const DashProfile = () => {
           {
               imageFileUploading && (
                   <Alert color="info">
-                      Upload en cours...
+                      Chargement de l'image en cours...
                   </Alert>
               )
           }
@@ -132,24 +196,47 @@ const DashProfile = () => {
                   </Alert>
               )
           }
+          {
+            updateUserSuccess && (
+              <Alert color="success">
+                {updateUserSuccess}
+              </Alert>
+            )
+          }
+          {
+            updateUserError && (
+              <Alert color="failure">
+                {updateUserError}
+              </Alert>
+            )
+          }
           <TextInput 
             type="text" 
             id="username" 
             placeholder="username" 
             defaultValue={currentUser.username} 
+            onChange={handlerChange}
           />
           <TextInput 
             type="email" 
             id="email" 
             placeholder="email" 
             defaultValue={currentUser.email} 
+            onChange={handlerChange}
           />
           <TextInput 
             type="password" 
             id="password" 
             placeholder="password" 
+            onChange={handlerChange}
           />
-          <Button type="submit" className="cursor-pointer">Update</Button>
+          <Button 
+            type="submit" 
+            disabled={isImageChanged || imageFileUploading}
+            className="cursor-pointer"
+            >
+              Update
+            </Button>
         </form>
         <div className="mt-5 text-red-500 flex justify-between">
           <span className="cursor-pointer">Delete account</span>
