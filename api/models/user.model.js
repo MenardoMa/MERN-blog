@@ -23,6 +23,10 @@ const userSchema = new Schema(
         profilePictureId: {
             type: String,
             default: null
+        },
+        isAdmin: {
+            type: Boolean,
+            default: false,
         }
     },
     {
