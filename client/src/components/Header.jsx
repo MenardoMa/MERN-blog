@@ -18,12 +18,38 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from "../redux/theme/themeSlice.js"
 
+import { signoutSuccess } from "../redux/user/userSlice.js"
+
 const Header = () => {
 
   const path = useLocation().pathname
   const dispatch = useDispatch()
   const { currentUser } = useSelector(state => state.user )
   const { theme } = useSelector(state => state.theme)
+
+    // Logout
+  const handlerSignOut = async (e) => {
+    e.preventDefault()
+
+    try {
+      
+      const res = await fetch("/api/user/signout", {
+        method: "POST"
+      })
+
+      const data = await res.json()
+
+      if(!res.ok){
+        console.log("ok")
+      }else{
+        dispatch(signoutSuccess())
+      }
+
+    } catch (error) {
+      console.log('Une erreur est survenue ' + error.message)
+    }
+  } 
+
 
   return (
     <Navbar className="border-b-2">
@@ -78,7 +104,10 @@ const Header = () => {
                                 </DropdownItem>
                             </Link>
                             <DropdownDivider />
-                            <Link to="/dashboard?tab=profile">
+                            <Link 
+                                to="#"
+                                onClick={handlerSignOut}
+                            >
                                 <DropdownItem>
                                     Sign out
                                 </DropdownItem>

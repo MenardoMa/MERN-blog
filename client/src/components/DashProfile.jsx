@@ -15,6 +15,7 @@ import {
   deleteUserStart,
   deleteUserFailure,
   deleteUserSuccess,
+  signoutSuccess,
 } from "../redux/user/userSlice.js"
 import { useDispatch } from "react-redux"
 import { HiOutlineExclamationCircle } from "react-icons/hi";
@@ -207,6 +208,29 @@ const DashProfile = () => {
 
   }
 
+  // Logout
+  const handlerSignOut = async (e) => {
+    e.preventDefault()
+
+    try {
+      
+      const res = await fetch("/api/user/signout", {
+        method: "POST"
+      })
+
+      const data = await res.json()
+
+      if(!res.ok){
+        console.log("ok")
+      }else{
+        dispatch(signoutSuccess())
+      }
+
+    } catch (error) {
+      console.log('Une erreur est survenue ' + error.message)
+    }
+  } 
+
 
 
   return (
@@ -294,7 +318,12 @@ const DashProfile = () => {
             >
               Delete account
             </span>
-          <span className="cursor-pointer">Sign out</span>
+          <span 
+            className="cursor-pointer"
+            onClick={handlerSignOut}
+            >
+              Sign out
+            </span>
         </div>
 
 
