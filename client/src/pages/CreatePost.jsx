@@ -2,17 +2,34 @@ import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
 import { useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import { useNavigate } from 'react-router-dom';
 
 const CreatePost = () => {
 
+    const categories = [
+        "javascript",
+        "reactjs",
+        "nextjs",
+    ];
+
   const [file, setFile] = useState(null)
-  const [imageUrl, setImageUrl] = useState("");
-  const [imagePublicId, setImagePublicId] = useState("");
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(null);
+  const [postError, setPostError] = useState(null)
+  
+  const [postSuccess, setPostSuccess] = useState(null)
+  const [postFormData, setPostFormData] = useState({})
+  const [postLoading, setPostLoading] = useState(false)
 
+  const navigation = useNavigate()
+
+  /**
+   * Upload Image
+   * 
+   * @returns 
+   */
   const handlerUploadImage = async () => {
 
     if(!file){
@@ -46,11 +63,12 @@ const CreatePost = () => {
             return;
         }
 
-        setImageUrl(data.url)
-        setImagePublicId(data.public_id)
         setUploadSuccess("Image chargé avec succes")
-
-        console.log(data)
+        setPostFormData((prev) => ({
+            ...prev,
+            image: data.url,
+            image_id: data.public_id,
+        }));
 
     } catch (error) {
         setUploadError(error.message);
@@ -59,10 +77,66 @@ const CreatePost = () => {
 
   }
 
+  /**
+   * Submit Post
+   * 
+   * @param {*} e 
+   * @returns 
+   */
+  const handlerSubmit = async (e) => {
+    
+    e.preventDefault()
+    setPostError(null)
+    setPostSuccess(null)
+    setPostLoading(true)
+    
+    if (Object.keys(postFormData).length === 0) {
+        setPostError("Vous devez redigerer un post")
+        setPostLoading(false)
+        return;
+    }
+
+    try {
+    
+        const res = await fetch("/api/post/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(postFormData)
+        })
+
+        const data = await res.json()
+
+        if(!res.ok){
+           setPostError(data.message) 
+           setPostSuccess(null)
+           return
+        }
+ 
+        if(res.ok){
+           setPostError(null) 
+           setPostSuccess("Post creer avec success")
+           navigation(`/post/${data.slug}`)
+        }
+
+        setPostLoading(false)
+        
+    } catch (error) {
+        setPostError(error.message)
+        setPostSuccess(null)
+    } finally{
+        setPostLoading(false)
+    }   
+
+
+  }
+
+
   return (
     <div className="p-3 max-w-3xl w-full mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Create Post</h1>
-      <form action="" className="flex flex-col gap-4">
+      <form action="" className="flex flex-col gap-4" onSubmit={handlerSubmit}>
             {uploadError && (
                 <Alert color="failure">
                     {uploadError}
@@ -73,6 +147,16 @@ const CreatePost = () => {
                     {uploadSuccess}
                 </Alert>
             )}
+            {postError && (
+                <Alert color="failure">
+                    {postError}
+                </Alert>
+            )}
+            {postSuccess && (
+                <Alert color="success">
+                    {postSuccess}
+                </Alert>
+            )}
             <div className="flex flex-col gap-4 sm:flex-row justify-between">
                 <TextInput 
                     type="text"
@@ -80,12 +164,27 @@ const CreatePost = () => {
                     required
                     id="title"
                     className="flex-1"
+                    onChange={(e) =>
+                        setPostFormData((prev) => ({
+                            ...prev,
+                            title: e.target.value.trim(), 
+                        }))
+                    }
                 />
-                <Select>
-                    <option value="uncategorizes">Selectionne une categorie</option>
-                    <option value="javascript">Javascript</option>
-                    <option value="reactjs">React.js</option>
-                    <option value="nextjs">Next.js</option>
+                <Select
+                    onChange={(e) =>
+                        setPostFormData((prev) => ({
+                            ...prev,
+                            category: e.target.value, 
+                        }))
+                    }
+                >
+                     <option value="">Sélectionnez une catégorie</option>
+                    {categories.map(category => (
+                        <option key={category} value={category}>
+                            {category}
+                        </option>
+                    ))}
                 </Select>
             </div>
             <div 
@@ -102,7 +201,7 @@ const CreatePost = () => {
                     outline
                     className="cursor-pointer"
                     onClick={handlerUploadImage}
-                    disabled={uploading}
+                      disabled={uploading}
                 >
                     {uploading ? "Chargement..." : "Upload image"}
                 </Button>
@@ -112,13 +211,22 @@ const CreatePost = () => {
                 placeholder="Contenue"
                 className="h-80 mb-12"
                 required
+                onChange={(value) =>
+                    setPostFormData((prev) => ({
+                        ...prev,
+                        content: value, 
+                    }))
+                }
             />
             <Button
                 type="submit"
                 outline
                 className="cursor-pointer"
+                disabled={uploading || postLoading}
             >
-                Publier
+                {
+                    postLoading ? "Publication ..." : "Publier"
+                }
             </Button>
       </form>
     </div>

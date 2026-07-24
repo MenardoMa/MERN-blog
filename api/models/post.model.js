@@ -18,6 +18,10 @@ const postSchema = new Schema({
         type: String,
         default: 'https://meduclinic.com/assets/images/blog-default-image.png'
     },
+    image_id: {
+        type: String,
+        default: null
+    },
     category: {
         type: String,
         default: "uncategorized",
