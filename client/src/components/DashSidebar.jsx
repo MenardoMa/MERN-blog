@@ -1,13 +1,17 @@
 import { Sidebar, SidebarItem, SidebarItemGroup, SidebarItems } from "flowbite-react";
-import { HiArrowSmRight, HiUser } from "react-icons/hi";
+import { HiArrowSmRight, HiDocumentText, HiUser } from "react-icons/hi";
 
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+
+import { useSelector } from 'react-redux';
 
 const DashSidebar = () => {
 
   const location = useLocation()
   const [tab, setTab] = useState('')
+
+  const { currentUser } = useSelector(state => state.user)
 
   useEffect(() => {
 
@@ -23,17 +27,30 @@ const DashSidebar = () => {
   return (
     <Sidebar className="w-full md:w-56">
       <SidebarItems>
-        <SidebarItemGroup>
+        <SidebarItemGroup className="flex flex-col gap-1">
           <SidebarItem
             as={Link}
             to="/dashboard?tab=profile"
             icon={HiUser}
             active={tab === "profile"}
-            label="User"
+            label={ currentUser.isAdmin ? "Admin" : "User"}
             labelColor="dark"
           >
             Profile
           </SidebarItem>
+          {
+            currentUser.isAdmin && 
+            <>
+              <SidebarItem
+                as={Link}
+                to="/dashboard?tab=posts"
+                icon={HiDocumentText}
+                active={tab === "posts"}
+              >
+                Posts        
+              </SidebarItem>
+            </>
+          }
           
           <SidebarItem icon={HiArrowSmRight}  className="cursor-pointer">
             Profile
