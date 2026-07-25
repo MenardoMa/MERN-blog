@@ -1,4 +1,4 @@
-import { Table, TableBody, TableRow, TableCell, TableHead, TableHeadCell } from "flowbite-react";
+import { Table, TableBody, TableRow, TableCell, TableHead, TableHeadCell, Button } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -7,8 +7,7 @@ const DashPosts = () => {
   
   const { currentUser } = useSelector(state => state.user)
   const [userPosts, setUserPosts] = useState([])
-
-  console.log(userPosts)
+  const [showMore, setShowMore] = useState(true)
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -19,6 +18,9 @@ const DashPosts = () => {
 
         if(res.ok){
           setUserPosts(data.posts)
+          if(data.post.length < 9){
+            setShowMore(false)
+          }
         }
 
       } catch (error) {
@@ -31,6 +33,27 @@ const DashPosts = () => {
     }
 
   }, [currentUser._id])
+
+  const handlerShowMore = async () => {
+    
+    const startIndex = userPosts.length
+
+    try {
+      
+      const res = await fetch(`/api/post/getPosts?userId=${currentUser._id}&startIndex=${startIndex}`)
+      const data = await res.json()
+
+      if(res.ok){
+        setUserPosts((prev) => [...prev, ...data.posts])
+        if(data.posts.length < 9){
+          setShowMore(false)
+        }
+      }
+
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
   
   return (
     <div className="overflow-x-scroll table-auto md:mx-auto p-3">
@@ -85,6 +108,15 @@ const DashPosts = () => {
                   })
                 }
             </Table>
+            {
+              showMore && (
+                <button 
+                  onClick={handlerShowMore} 
+                  className="w-full text-teal-500 text-sm self-auto mx-auto cursor-pointer py-7">
+                  voir plus +
+                </button>
+              )
+            }
           </> 
           : 
           <>
