@@ -158,11 +158,20 @@ export const updatePost = async (req, res, next) => {
             await cloudinary.uploader.destroy(post.image_id);
         }
 
+        const slug = req.body.title
+        ? req.body.title
+            .split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9-]/g, "-")
+        : post.slug;
+
         const updatedPost = await Post.findByIdAndUpdate(
         req.params.postId,
         {
             $set: {
                 title: req.body.title,
+                slug,
                 content: req.body.content,
                 category: req.body.category,
                 image: req.body.image,

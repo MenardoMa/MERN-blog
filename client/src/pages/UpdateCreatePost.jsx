@@ -2,6 +2,7 @@ import { Alert, Button, FileInput, Select, TextInput, Spinner } from "flowbite-r
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from 'react-router-dom';
 
 const UpdateCreatePost = () => {
@@ -33,6 +34,7 @@ const UpdateCreatePost = () => {
 
   const navigation = useNavigate()
   const { postId } = useParams()
+  const { currentUser } = useSelector(state => state.user)
 
   /**
    * 
@@ -142,8 +144,8 @@ useEffect(() => {
 
     try {
     
-        const res = await fetch("/api/post/create", {
-            method: "POST",
+        const res = await fetch(`/api/post/updatePost/${postFormData._id}/${currentUser._id}`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json"
             },
