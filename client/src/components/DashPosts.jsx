@@ -39,8 +39,6 @@ const DashPosts = () => {
         const res = await fetch(`/api/post/getPosts?userId=${currentUser._id}`);
         const data = await res.json();
 
-        console.log(data);
-
         if (res.ok) {
           setUserPosts(data.posts);
 
@@ -58,7 +56,7 @@ const DashPosts = () => {
     if (currentUser?.isAdmin) {
       fetchPost();
     }
-  }, [currentUser]);
+  }, [currentUser._id]);
 
   /**
    * Show more post 
@@ -124,7 +122,7 @@ const DashPosts = () => {
   return (
     <>
       {loadingPosts ? (
-        <div className="flex justify-center py-10">
+        <div className="flex justify-center mx-auto items-center py-10">
           <Spinner size="xl" />
         </div>
       ) : userPosts.length > 0 ? (
