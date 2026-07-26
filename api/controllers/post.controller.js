@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js";
 import { errorHandler } from "../utils/error.js";
+import cloudinary from '../config/cloudinary.js';
 
 /**
  * Create post model
@@ -39,6 +40,13 @@ export const create = async (req, res, next) => {
     }
 }
 
+/**
+ * Get All Posts method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 export const getPosts = async (req, res, next) => {
     try {
         
@@ -81,6 +89,40 @@ export const getPosts = async (req, res, next) => {
             totalPosts,
             lastMonthPosts
         })
+
+    } catch (error) {
+        next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
+    }
+}
+
+/**
+ * Delete Post method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const deletePost = async (req, res, next) => {
+    
+    if(!req.user.isAdmin && req.user.id !== req.params.userId){
+        return next(errorHandler(403, "Vous n'etes pas autorisé a supprimé ce Post"))
+    } 
+    
+    try {
+        
+        const post = await Post.findById(req.params.postId);
+
+        if(!post){
+            return next(errorHandler(404, "Post introuvable."));
+        }
+
+        if(post.image_id){
+            await cloudinary.uploader.destroy(post.image_id);
+        }
+
+        await Post.findByIdAndDelete(post._id)
+        res.status(200).json("Post supprimé avec succès.")
 
     } catch (error) {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
