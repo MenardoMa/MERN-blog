@@ -122,7 +122,7 @@ export const deletePost = async (req, res, next) => {
         }
 
         await Post.findByIdAndDelete(post._id)
-        res.status(200).json("Post supprimé avec succès.")
+        res.status(200).json({message: "Post supprimé avec succès."})
 
     } catch (error) {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
