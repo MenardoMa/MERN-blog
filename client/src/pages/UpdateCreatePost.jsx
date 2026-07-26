@@ -263,7 +263,7 @@ useEffect(() => {
             {
                 postFormData.image && 
                 <>
-                    <div className="w-full overflow-hidden h-[500px]">
+                    <div className="w-full overflow-hidden h-[500px] border border-zinc-300">
                         <img 
                             src={postFormData.image} 
                             alt={postFormData.title}

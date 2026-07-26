@@ -128,3 +128,53 @@ export const deletePost = async (req, res, next) => {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
     }
 }
+
+/**
+ * Update Post model
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const updatePost = async (req, res, next) => {
+    
+    if(!req.user.isAdmin && req.user.id !== req.params.userId){
+        return next(errorHandler(403, "Vous n'etes pas autorisé a supprimé ce Post"))
+    } 
+    
+    try {
+
+        const post = await Post.findById(req.params.postId);
+
+        if(!post){
+            return next(errorHandler(404, "Post introuvable."));
+        }
+
+       if (
+            req.body.image_id &&
+            req.body.image_id !== post.image_id
+        ) {
+            await cloudinary.uploader.destroy(post.image_id);
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+        req.params.postId,
+        {
+            $set: {
+                title: req.body.title,
+                content: req.body.content,
+                category: req.body.category,
+                image: req.body.image,
+                image_id: req.body.image_id,
+            },
+        },
+            { new: true }
+        );
+
+        res.status(200).json(updatedPost)
+        
+    } catch (error) {
+        next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
+    }
+}
