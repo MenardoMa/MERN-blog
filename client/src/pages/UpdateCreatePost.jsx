@@ -1,4 +1,4 @@
-import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
+import { Alert, Button, FileInput, Select, TextInput, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
@@ -20,38 +20,54 @@ const UpdateCreatePost = () => {
   const [postError, setPostError] = useState(null)
   
   const [postSuccess, setPostSuccess] = useState(null)
-  const [postFormData, setPostFormData] = useState({})
+  const [postFormData, setPostFormData] = useState({
+    title: "",
+    category: "",
+    content: "",
+    image: "",
+    image_id: ""
+  })
   const [postLoading, setPostLoading] = useState(false)
+  const [loadingPost, setLoadingPost] = useState(true);
+  const [loadingPage, setLoadingPage] = useState(false)
 
   const navigation = useNavigate()
-//   const { postId } = useParams()
+  const { postId } = useParams()
 
-//   useEffect(() => {
-
-//     try {
+  /**
+   * 
+   * Fetch Post 
+   * 
+   */
+useEffect(() => {
+    const fetchPost = async () => {
         
-//        const fetchPost = async () => {
-//             const res = await fetch(`/api/post/getPosts?postId=${postId}`)
-//             const data = await res.json()
+        setLoadingPage(true)
 
-//             if(!res.ok){
-//                 setPostError(data.message)
-//                 return
-//             }
+        try {
+            const res = await fetch(`/api/post/getPosts?postId=${postId}`);
+            const data = await res.json();
 
-//             if(res.ok){
-//                 setPostError(null)
-//                 setPostFormData(data.posts[0])
-//             }
-//        }
+            if (!res.ok) {
+                setPostError(data.message);
+                return;
+            }
 
-//        fetchPost()
+            setPostFormData(data.posts[0]);
 
-//     } catch (error) {
-//         console.log(error.message)
-//     }
+        } catch (error) {
+            setPostError(error.message);
+        } finally {
+            setLoadingPost(false);
+            setLoadingPage(false)
+        }
+    };
 
-//   }, [postId])
+    if(postId){
+        fetchPost();
+    }
+
+}, [postId]);
 
   /**
    * Upload Image
@@ -162,9 +178,17 @@ const UpdateCreatePost = () => {
 
 
   return (
-    <div className="p-3 max-w-3xl w-full mx-auto min-h-screen">
-      <h1 className="text-center text-3xl my-7 font-semibold">Create Post</h1>
-      <form action="" className="flex flex-col gap-4" onSubmit={handlerSubmit}>
+    <>
+    {
+        loadingPage ? (
+          <div className="flex justify-center mx-auto items-center py-10">
+            <Spinner size="xl" />
+          </div>
+        ) :
+        (
+        <div className="p-3 max-w-3xl w-full mx-auto min-h-screen">
+        <h1 className="text-center text-3xl my-7 font-semibold">Update Post</h1>
+        <form action="" className="flex flex-col gap-4" onSubmit={handlerSubmit}>
             {uploadError && (
                 <Alert color="failure">
                     {uploadError}
@@ -198,7 +222,7 @@ const UpdateCreatePost = () => {
                             title: e.target.value.trim(), 
                         }))
                     }
-                    // value={postFormData.title}
+                    value={postFormData.title || ""}
                 />
                 <Select
                     onChange={(e) =>
@@ -207,6 +231,7 @@ const UpdateCreatePost = () => {
                             category: e.target.value, 
                         }))
                     }
+                    value={postFormData.category || ""}
                 >
                      <option value="">Sélectionnez une catégorie</option>
                     {categories.map(category => (
@@ -235,6 +260,18 @@ const UpdateCreatePost = () => {
                     {uploading ? "Chargement..." : "Upload image"}
                 </Button>
             </div>
+            {
+                postFormData.image && 
+                <>
+                    <div className="w-full overflow-hidden h-[500px]">
+                        <img 
+                            src={postFormData.image} 
+                            alt={postFormData.title}
+                            className="object-cover h-full w-full"
+                        />
+                    </div>
+                </>
+            }
             <ReactQuill 
                 theme="snow" 
                 placeholder="Contenue"
@@ -246,6 +283,7 @@ const UpdateCreatePost = () => {
                         content: value, 
                     }))
                 }
+                value={loadingPost ? "" : postFormData.content || ""}
             />
             <Button
                 type="submit"
@@ -254,11 +292,14 @@ const UpdateCreatePost = () => {
                 disabled={uploading || postLoading}
             >
                 {
-                    postLoading ? "Publication ..." : "Publier"
+                    postLoading ? "Modification ..." : "Modifier"
                 }
             </Button>
       </form>
-    </div>
+        </div>
+        )
+    }
+    </>
   )
 }
 
