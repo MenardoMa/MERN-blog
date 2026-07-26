@@ -24,6 +24,7 @@ const DashPosts = () => {
   const [showModal, setShowModal] = useState(false)
   const [postIDToDelete, setPostIDToDelete] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
   /**
    * 
@@ -32,28 +33,32 @@ const DashPosts = () => {
    */
   useEffect(() => {
     const fetchPost = async () => {
-      try {
-        
-        const res = await fetch(`/api/post/getPosts?userId=${currentUser._id}`)
-        const data = await res.json()
+      setLoadingPosts(true);
 
-        if(res.ok){
-          setUserPosts(data.posts)
-          if(data.post.length < 9){
-            setShowMore(false)
+      try {
+        const res = await fetch(`/api/post/getPosts?userId=${currentUser._id}`);
+        const data = await res.json();
+
+        console.log(data);
+
+        if (res.ok) {
+          setUserPosts(data.posts);
+
+          if (data.posts.length < 9) {
+            setShowMore(false);
           }
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
+      } finally {
+        setLoadingPosts(false);
       }
-    }
+    };
 
-    if(currentUser.isAdmin){
-      fetchPost()
+    if (currentUser?.isAdmin) {
+      fetchPost();
     }
-
-  }, [currentUser._id])
+  }, [currentUser]);
 
   /**
    * Show more post 
@@ -80,6 +85,12 @@ const DashPosts = () => {
     }
   }
 
+  /**
+   * 
+   * Delete Post
+   * 
+   * @param {*} e 
+   */
   const handlerDeletePost = async (e) => {
     
     e.preventDefault()
@@ -109,119 +120,134 @@ const DashPosts = () => {
       setLoading(false)
     }
   }
-  
+
   return (
-    <div className="overflow-x-scroll table-auto md:mx-auto p-3">
-        {
-          userPosts.length > 0 ? 
-          <>
-            <Table hoverable className="shadow-md">
-                <TableHead>
-                  <TableRow>
-                    <TableHeadCell>Date update</TableHeadCell>
-                    <TableHeadCell>Post image</TableHeadCell>
-                    <TableHeadCell>Posts title</TableHeadCell>
-                    <TableHeadCell>Category</TableHeadCell>
-                    <TableHeadCell>Delete</TableHeadCell>
-                    <TableHeadCell>Edit</TableHeadCell>
-                  </TableRow>
-                </TableHead>
-                {
-                  userPosts.map((post) => {
-                    return (
-                      <TableBody key={post._id}>
-                        <TableRow>
-                          <TableCell>
-                            {new Date(post.updatedAt).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <Link to={`/post/${post.slug}`}>
-                              <img
-                                src={post.image}
-                                alt={post.title}
-                                className="w-20 h-20 object-cover bg-gray-500 border border-gray-500"
-                              />
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <Link to={`/post/${post.slug}`}>
-                                {post.title}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{post.category}</TableCell>
-                          <TableCell 
-                            className="font-medium text-red-500 hover:underline cursor-pointer"
-                            onClick={() => {
-                              setShowModal(true) 
-                              setPostIDToDelete(post._id)
-                            }}
-                          >
-                            <span>Delete</span>
-                          </TableCell>
-                          <TableCell>
-                            <Link className="text-teal-500 font-medium hover:underline cursor-pointer" to={`/update-post/${post._id}`}>
-                              <span>Edit</span>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    );
-                  })
-                }
-            </Table>
-            {
-              showMore && (
-                <button 
-                  onClick={handlerShowMore} 
-                  className="w-full text-teal-500 text-sm self-auto mx-auto cursor-pointer py-7">
-                  voir plus +
-                </button>
-              )
-            }
-          </> 
-          : 
-          <>
-            <p>Vous n'avez pas de posts.</p>
-          </>
-        }
-        <Modal show={showModal} size="md" onClose={() => setShowModal(false)} popup>
-          <ModalHeader />
-          <ModalBody>
-            <div className="text-center">
-              <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                Êtes-vous sûr de vouloir supprimer cet article ?
-              </h3>
-              <div className="flex justify-center gap-4">
-                <Button 
-                  color="red"
-                  onClick={handlerDeletePost}
-                  className="cursor-pointer"
-                >
-                  {
-                    loading ? 
+    <>
+      {loadingPosts ? (
+        <div className="flex justify-center py-10">
+          <Spinner size="xl" />
+        </div>
+      ) : userPosts.length > 0 ? (
+        <div className="overflow-x-scroll table-auto md:mx-auto p-3">
+          <Table hoverable className="shadow-md">
+            <TableHead>
+              <TableRow>
+                <TableHeadCell>Date update</TableHeadCell>
+                <TableHeadCell>Post image</TableHeadCell>
+                <TableHeadCell>Posts title</TableHeadCell>
+                <TableHeadCell>Category</TableHeadCell>
+                <TableHeadCell>Delete</TableHeadCell>
+                <TableHeadCell>Edit</TableHeadCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody className="divide-y">
+              {userPosts.map((post) => (
+                <TableRow key={post._id}>
+                  <TableCell>
+                    {new Date(post.updatedAt).toLocaleDateString()}
+                  </TableCell>
+
+                  <TableCell>
+                    <Link to={`/post/${post.slug}`}>
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-20 h-20 object-cover bg-gray-500 border border-gray-500"
+                      />
+                    </Link>
+                  </TableCell>
+
+                  <TableCell>
+                    <Link to={`/post/${post.slug}`}>
+                      {post.title}
+                    </Link>
+                  </TableCell>
+
+                  <TableCell>{post.category}</TableCell>
+
+                  <TableCell
+                    className="font-medium text-red-500 hover:underline cursor-pointer"
+                    onClick={() => {
+                      setShowModal(true);
+                      setPostIDToDelete(post._id);
+                    }}
+                  >
+                    Delete
+                  </TableCell>
+
+                  <TableCell>
+                    <Link
+                      to={`/update-post/${post._id}`}
+                      className="text-teal-500 font-medium hover:underline cursor-pointer"
+                    >
+                      Edit
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {showMore && (
+            <button
+              onClick={handlerShowMore}
+              className="w-full text-teal-500 text-sm mx-auto cursor-pointer py-7"
+            >
+              Voir plus +
+            </button>
+          )}
+
+          <Modal
+            show={showModal}
+            size="md"
+            onClose={() => setShowModal(false)}
+            popup
+          >
+            <ModalHeader />
+            <ModalBody>
+              <div className="text-center">
+                <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+
+                <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                  Êtes-vous sûr de vouloir supprimer cet article ?
+                </h3>
+
+                <div className="flex justify-center gap-4">
+                  <Button
+                    color="red"
+                    onClick={handlerDeletePost}
+                    className="cursor-pointer"
+                  >
+                    {loading ? (
                       <>
                         <Spinner size="sm" className="mr-2" />
                         Suppression...
                       </>
-                     : 
+                    ) : (
                       "Oui, supprimer"
-                    
-                  }
-                </Button>
-                <Button 
-                  color="alternative" 
-                  onClick={() => setShowModal(false)}
-                  className="cursor-pointer"
-                >
-                  Non, annuler
-                </Button>
+                    )}
+                  </Button>
+
+                  <Button
+                    color="alternative"
+                    onClick={() => setShowModal(false)}
+                    className="cursor-pointer"
+                  >
+                    Non, annuler
+                  </Button>
+                </div>
               </div>
-            </div>
-          </ModalBody>
-        </Modal>
-    </div>
-  )
+            </ModalBody>
+          </Modal>
+        </div>
+      ) : (
+        <div className="flex justify-center py-10">
+          <p className="text-gray-500">Vous n'avez pas de posts.</p>
+        </div>
+      )}
+    </>
+  );
 }
 
 export default DashPosts
