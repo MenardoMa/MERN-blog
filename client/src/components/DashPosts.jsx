@@ -240,8 +240,13 @@ const DashPosts = () => {
           </Modal>
         </div>
       ) : (
-        <div className="flex justify-center py-10">
+        <div className="flex justify-center flex-col mx-auto gap-4 py-10">
           <p className="text-gray-500">Vous n'avez pas de posts.</p>
+          <Button className="cursor-pointer">
+              <Link to="/create-post">
+                  Create Post +
+              </Link>
+          </Button>
         </div>
       )}
     </>
