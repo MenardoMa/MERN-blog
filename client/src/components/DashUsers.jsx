@@ -100,7 +100,7 @@ const DashUsers = () => {
 
     try {
       
-      const res = await fetch(`/api/user/delete/${userIDToDelete}`, {
+      const res = await fetch(`/api/user/admin/delete/${userIDToDelete}`, {
         method: "DELETE"
       })
 
