@@ -168,6 +168,10 @@ export const deleteUserAdmin = async (req, res, next) => {
             return next(errorHandler(404, "Utilisateur introuvable."));
         }
 
+        if(user.isAdmin === true){
+            return next(errorHandler(404, "Accès refusé vous etes un admin"));
+        }
+
         if (user.profilePictureId) {
             await cloudinary.uploader.destroy(user.profilePictureId);
         }
