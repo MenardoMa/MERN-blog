@@ -145,6 +145,44 @@ export const deleteUser = async (req, res, next) => {
     }
 };
 
+
+/**
+ * Delete User From Admin method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const deleteUserAdmin = async (req, res, next) => {
+    
+    if (!req.user.isAdmin) {
+        return next(errorHandler(403, "Accès refusé."));
+    }
+    
+    try {
+       
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return next(errorHandler(404, "Utilisateur introuvable."));
+        }
+
+        if (user.profilePictureId) {
+            await cloudinary.uploader.destroy(user.profilePictureId);
+        }
+
+        await User.findByIdAndDelete(user._id);
+
+        res.status(200).json({
+            message: "Utilisateur supprimé avec succès."
+        });
+        
+    } catch (error) {
+        return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
+    }
+}
+
 /**
  * Get Users method
  * 

@@ -4,7 +4,8 @@ import {
     updateUser, 
     deleteUser, 
     signout, 
-    getUsers
+    getUsers,
+    deleteUserAdmin
 } from "../controllers/user.controller.js";
 import { verifyToken } from "../middleware/verifyToken.middleware.js";
 
@@ -14,6 +15,7 @@ router.get('/test', test)
 router.put('/update/:userId', verifyToken, updateUser) //Modification user endpoint
 router.delete('/delete/:userId', verifyToken, deleteUser) //Delete user a compte endpoint
 router.get('/getUsers', verifyToken, getUsers)
+router.delete('/admin/delete/:userId', verifyToken, deleteUserAdmin)
 router.post('/signout', signout) //Logout
 
 export default router
