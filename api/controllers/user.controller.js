@@ -145,6 +145,14 @@ export const deleteUser = async (req, res, next) => {
     }
 };
 
+/**
+ * Get Users method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
 export const getUsers = async (req, res, next) => {
     
     if(!req.user.isAdmin){
@@ -191,7 +199,6 @@ export const getUsers = async (req, res, next) => {
         return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
     }
 }
-
 
 /**
  * signout method
