@@ -2,6 +2,7 @@ import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "react-quill-new/dist/quill.snow.css";
+import CallToAction from "../components/CallToAction";
 
 const PostPage = () => {
   const { postSlug } = useParams()
@@ -78,6 +79,9 @@ const PostPage = () => {
                         className="ql-editor p-3 max-w-4xl mx-auto w-full post-content"
                     >
 
+                    </div>
+                    <div className="">
+                        <CallToAction />
                     </div>
                 </main>
             )

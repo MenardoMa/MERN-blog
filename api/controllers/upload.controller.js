@@ -19,8 +19,12 @@ export const uploadImage = async (req, res, next) => {
                 folder:`mern-blog/${folder}`,
                 transformation:[
                     {
+                        width: 1200,
+                        height: 675,
+                        crop: "fill",
+                        gravity: "auto",
                         quality: "auto",
-                        fetch_format: "auto"
+                        fetch_format: "auto",
                     }
                 ]
             }
