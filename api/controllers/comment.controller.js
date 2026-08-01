@@ -57,3 +57,40 @@ export const getPostComment = async (req, res, next) => {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
     }
 }
+
+/**
+ * Like Comment for Post method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const likeComment = async (req, res, next) => {
+    try {
+        
+        const { commentId } = req.params
+        const comment = await Comment.findById(commentId)
+
+        if(!comment){
+            return next(errorHandler(400, "Comment introuvable"))
+        }
+
+         const userId = req.user.id;
+        const userIndex = comment.likes.indexOf(userId)
+
+        if(userIndex === -1){
+            comment.numberOfLikes += 1
+            comment.likes.push(userId)
+        }else{
+            comment.numberOfLikes -= 1
+            comment.likes.splice(userIndex, 1)
+        }
+
+        await comment.save()
+        res.status(200).json(comment)
+
+    } catch (error) {
+        next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
+    }
+}
