@@ -50,8 +50,8 @@ export const getPostComment = async (req, res, next) => {
         
         const { postId } = req.params;
         const comments = await Comment.find({ postId })
-            .sort({ createdAt: -1 })
-        res.status(201).json(comment)
+                                      .sort({ createdAt: -1 })
+        res.status(201).json(comments)
 
     } catch (error) {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))

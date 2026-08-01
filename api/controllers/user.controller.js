@@ -262,3 +262,29 @@ export const signout = async (req, res, next) => {
         return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
     }
 }
+
+/**
+ * 
+ * Get User
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const getUser = async (req, res, next) => {
+    try {
+        
+        const { userId } = req.params
+        const user = await User.findById(userId).select("-password");
+
+        if (!user) {
+            return next(errorHandler(404, "Utilisateur introuvable."));
+        }
+
+        res.status(200).json(user)
+
+    } catch (error) {
+        return next(errorHandler(500, "Une erreur interne est survenue. " + error.message));
+    }
+}

@@ -1,7 +1,8 @@
 import { Button, Spinner, Textarea } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Comment from "./Comment";
 
 
 const CommentSection = ({ postId }) => {
@@ -10,8 +11,14 @@ const CommentSection = ({ postId }) => {
     const [comment, setComment] = useState('')
     const [commentError, setCommentError] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [getComment, setGetComment] = useState([])
 
-
+    /**
+     * Add Comment
+     * 
+     * @param {*} e 
+     * @returns 
+     */
     const handlerComment = async (e) => {
         e.preventDefault()
 
@@ -42,23 +49,46 @@ const CommentSection = ({ postId }) => {
             const data = await res.json()
 
             if(!res.ok){
-                console.log(data.message)
                 setCommentError(data.message)
             }
 
             if(res.ok){
-                console.log(data)
                 setComment('')
                 setCommentError(null)
+                setGetComment((prev) => [data, ...prev]);
             }
 
         } catch (error) {
-            console.log(error.message)
             setCommentError(error.message)
         }finally{
             setLoading(false)
         }
     }
+    
+    /**
+     * Get Comment
+     * 
+     */
+    useEffect(() => {
+        const fetchComment = async () => {
+            try {
+                const res = await fetch(`/api/comment/getPostComments/${postId}`)
+                const data = await res.json()
+
+                if(!res.ok){
+                    console.log(data.message)
+                }
+
+                if(res.ok){
+                    setGetComment(data)
+                }
+                
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchComment()
+    }, [postId])
 
     return (
     <div className="max-w-2xl mx-auto w-full p-3">
@@ -138,6 +168,28 @@ const CommentSection = ({ postId }) => {
             </form>
         )
       }
+    {
+        getComment.length === 0 ? (
+            <p>Pas de commentaire pour ce post</p>
+        ) : (
+            <>
+                <div className="text-sm flex items-center gap-1 my-5">
+                    <p>{getComment.length > 1 ? 'Commentaires' : 'Commentaire'}</p>
+                    <div className="border border-gray-400 py-1 px-2 rounded-sm">
+                        <p>{getComment.length}</p>
+                    </div>
+                </div>
+                {
+                    getComment.map((comment, key) => (
+                        <Comment
+                            key={key}
+                            content={comment}
+                        />
+                    ))
+                }
+            </>
+        )
+    }
     </div>
   )
 }
