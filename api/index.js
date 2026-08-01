@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js"
 import authRouter from "./routes/auth.route.js"
 import uploadRouter from "./routes/upload.route.js"
 import postRouter from "./routes/post.route.js"
+import commentRouter from "./routes/comment.route.js"
 
 dotenv.config()
 
@@ -36,6 +37,7 @@ app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/upload', uploadRouter)
 app.use('/api/post', postRouter)
+app.use('/api/comment', commentRouter)
 
 /**
  * 

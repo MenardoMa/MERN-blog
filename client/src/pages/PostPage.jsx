@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "react-quill-new/dist/quill.snow.css";
 import CallToAction from "../components/CallToAction";
+import CommentSection from "../components/CommentSection";
 
 const PostPage = () => {
   const { postSlug } = useParams()
@@ -80,9 +81,10 @@ const PostPage = () => {
                     >
 
                     </div>
-                    <div className="">
+                    <div className="max-w-6xl my-6 mx-auto w-full">
                         <CallToAction />
                     </div>
+                    <CommentSection postId={post?._id} />
                 </main>
             )
         }
