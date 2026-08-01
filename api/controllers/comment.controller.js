@@ -11,7 +11,7 @@ export const createComment = async (req, res, next) => {
         }
 
         if (!content || !postId) {
-            return next(errorHandler(400, "Tous les champs sont requis."));
+            return next(errorHandler(400, "Veuillez saisir votre commentaire."));
         }
 
         const newComment = new Comment({

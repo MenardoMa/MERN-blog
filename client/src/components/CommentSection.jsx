@@ -1,4 +1,4 @@
-import { Alert, Button, Textarea } from "flowbite-react";
+import { Alert, Button, Spinner, Textarea } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -8,10 +8,56 @@ const CommentSection = ({ postId }) => {
 
     const { currentUser } = useSelector(state => state.user)
     const [comment, setComment] = useState('')
+    const [commentError, setCommentError] = useState(null)
+    const [loading, setLoading] = useState(false)
 
 
-    const handlerComment = (e) => {
+    const handlerComment = async (e) => {
         e.preventDefault()
+
+        try {
+            
+            setCommentError(null);
+            setLoading(true)
+
+            if(comment.length > 200){
+                setCommentError("Votre commentaire ne peut pas dépasser 200 caractères.")
+                return
+            }
+
+            if (!comment.trim()) {
+                setCommentError("Veuillez saisir votre commentaire.");
+                setLoading(false);
+                return;
+            }
+
+            const res = await fetch('/api/comment/create', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({content: comment, postId, userId: currentUser._id})
+            })
+
+            const data = await res.json()
+
+            if(!res.ok){
+                console.log(data.message)
+                setCommentError(data.message)
+            }
+
+            if(res.ok){
+                console.log(data)
+                setComment('')
+                setCommentError(null)
+            }
+
+        } catch (error) {
+            console.log(error.message)
+            setCommentError(error.message)
+        }finally{
+            setLoading(false)
+        }
 
     }
 
@@ -53,27 +99,44 @@ const CommentSection = ({ postId }) => {
                 className="border border-teal-500 rounded-md p-3">
                 <Textarea 
                     placeholder="Add a comment ..."
-                    rows='3'
-                    maxLength='200'
-                    required
+                    maxLength={200}
+                    rows={3}
+                    value={comment || ''}
+                    // required
                     onChange={
-                        (e) => setComment(e.target.value)
+                        (e) => {
+                            setComment(e.target.value)
+                            setCommentError(null)
+                        }
                     }
                 />
+                {
+                    commentError && (
+                        <div className="mt-2">
+                            <p className="text-sm text-rose-500">{commentError}</p>
+                        </div>
+                    )
+                }
                 <div className="flex justify-between items-center mt-5">
-                    <p className="text-gray-500 text-sm">{200 - comment.length} caracteres remaining</p>
-                    <Button outline type="submit" className="cursor-pointer">
-                        Submit
+                    <p className="text-gray-500 text-sm">{200 - comment.length} caractères restants</p>
+                    <Button 
+                        outline 
+                        type="submit" 
+                        className="cursor-pointer"
+                        disabled={loading}
+                    >
+                        {
+                            loading ? 
+                            <>
+                                <Spinner size="sm" className="mr-2" />
+                                <span className="ml-2">Traitement...</span>
+                            </> 
+                            : 
+                            "Submit"
+                        } 
                     </Button>
                 </div>
             </form>
-        )
-      }
-      {
-        comment.length >= 200 && (
-            <Alert>
-                max lenght 200
-            </Alert>
         )
       }
     </div>
