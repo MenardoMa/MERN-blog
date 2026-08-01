@@ -1,5 +1,5 @@
-import { Alert, Button, Spinner, Textarea } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { Button, Spinner, Textarea } from "flowbite-react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -58,7 +58,6 @@ const CommentSection = ({ postId }) => {
         }finally{
             setLoading(false)
         }
-
     }
 
     return (
