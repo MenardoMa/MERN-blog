@@ -1,7 +1,7 @@
 import { Button, Spinner, Textarea } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Comment from "./Comment";
 
 
@@ -12,6 +12,8 @@ const CommentSection = ({ postId }) => {
     const [commentError, setCommentError] = useState(null)
     const [loading, setLoading] = useState(false)
     const [getComment, setGetComment] = useState([])
+
+    const navigation = useNavigate()
 
     /**
      * Add Comment
@@ -89,6 +91,46 @@ const CommentSection = ({ postId }) => {
         }
         fetchComment()
     }, [postId])
+
+    /**
+     * Like comment
+     * 
+     * @param {*} contentId 
+     * @returns 
+     */
+    const handlerLike = async (contentId) => {
+        if(!currentUser){
+            navigation('/sign-in')
+            return
+        }
+
+        try {
+            
+            const res = await fetch(`/api/comment/likeComment/${contentId}`, {
+                method: "PUT",
+            })
+
+            if(res.ok){
+                const data = await res.json()
+                setGetComment((prev) =>
+                    prev.map((comment) => {
+                        if (comment._id === contentId) {
+                        return {
+                            ...comment,
+                            likes: data.likes,
+                            numberOfLikes: data.numberOfLikes,
+                        };
+                        }
+                        return comment;
+                    })
+                );
+            }
+            
+        } catch (error) {
+            console.log(error.message)
+        }
+
+    }
 
     return (
     <div className="max-w-2xl mx-auto w-full p-3">
@@ -170,7 +212,9 @@ const CommentSection = ({ postId }) => {
       }
     {
         getComment.length === 0 ? (
-            <p>Pas de commentaire pour ce post</p>
+            <div className="my-3 text-sm text-gray-500">
+                <p>Pas de commentaire pour ce post</p>
+            </div>
         ) : (
             <>
                 <div className="text-sm flex items-center gap-1 my-5">
@@ -184,6 +228,7 @@ const CommentSection = ({ postId }) => {
                         <Comment
                             key={key}
                             content={comment}
+                            onLike={handlerLike}
                         />
                     ))
                 }

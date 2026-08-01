@@ -76,7 +76,7 @@ export const likeComment = async (req, res, next) => {
             return next(errorHandler(400, "Comment introuvable"))
         }
 
-         const userId = req.user.id;
+        const userId = req.user.id;
         const userIndex = comment.likes.indexOf(userId)
 
         if(userIndex === -1){
