@@ -94,3 +94,42 @@ export const likeComment = async (req, res, next) => {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
     }
 }
+
+/**
+ * Edit Comment method
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+export const editComment = async (req, res, next) => {
+    try {
+        
+        const { commentId } = req.params
+        const comment = await Comment.findById(commentId)
+
+        if(!comment){
+            return next(errorHandler(404, "Comment introuvable"))
+        }
+
+        if (comment.userId.toString() !== req.user.id && !req.user.isAdmin) {
+            return next(errorHandler(403, "Vous ne pouvez pas modifier ce commentaire"));
+        }
+
+        const editedComment = await Comment.findByIdAndUpdate(
+            commentId,
+            {
+                content: req.body.content
+            },
+            {
+                new: true
+            }
+        )
+
+        res.status(200).json(editedComment)
+
+    } catch (error) {
+        next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
+    }
+}
