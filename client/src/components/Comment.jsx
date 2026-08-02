@@ -11,6 +11,7 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
   const { currentUser } = useSelector(state => state.user)
 
   const [editedContent, setEditedContent] = useState(content.content)
+  const [editedContentError, setEditedContentError] = useState('')
   const [loadingOnSave, setLoadingOnSave] = useState(false)
   
   /**
@@ -51,6 +52,12 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
    * 
    */
   const handlerSaveEditing = async () => {
+    
+    if (!editedContent.trim()) {
+      setEditedContentError("Le commentaire est vide");
+      return
+    }
+
     try {
 
       setLoadingOnSave(true)
@@ -114,6 +121,11 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
                     value={ editedContent }
                     onChange={(e) => setEditedContent(e.target.value)}
                 />
+                {
+                  editedContentError && (
+                    <p className="text-sm text-red-500 my-2">{editedContentError}</p>
+                  )
+                }
                 <div className="flex gap-1 justify-end text-xs">
                   <Button
                     type="button"
