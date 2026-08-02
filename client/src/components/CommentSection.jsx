@@ -1,8 +1,17 @@
-import { Button, Spinner, Textarea } from "flowbite-react";
+import { 
+    Button, 
+    Spinner, 
+    Textarea,
+    Modal, 
+    ModalBody, 
+    ModalHeader  
+} from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Comment from "./Comment";
+
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 
 const CommentSection = ({ postId }) => {
@@ -14,6 +23,9 @@ const CommentSection = ({ postId }) => {
     const [getComment, setGetComment] = useState([])
 
     const [editingCommentId, setEditingCommentId] = useState(null)
+    const [showModal, setShowModal] = useState(false)
+    const [commentToDelete, setCommentToDelete] = useState(null)
+
 
     const navigation = useNavigate()
 
@@ -156,6 +168,42 @@ const CommentSection = ({ postId }) => {
         setEditingCommentId(null);
     }
 
+    /**
+     * Delete Comment 
+     * 
+     * @returns 
+     */
+    const handlerDeleteComment = async () => {
+        
+        if(!currentUser){
+            navigation('/sign-in')
+            return
+        }
+
+        try {
+
+            setLoading(true)
+
+            const res = await fetch(`/api/comment/deleteComment/${commentToDelete}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) return;
+
+            setGetComment(prev =>
+                prev.filter(comment => comment._id !== commentToDelete)
+            );
+
+            setShowModal(false);
+            setCommentToDelete(null);
+        } catch (error) {
+            console.log(error.message);
+        } finally{
+            setLoading(false)
+        }
+
+    }
+
     return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {
@@ -257,12 +305,53 @@ const CommentSection = ({ postId }) => {
                             onSave={saveEdit}
                             isEditing={editingCommentId === comment._id}
                             cancelEdit={() => setEditingCommentId(null)}
+                            onDelete={(commentId) => {
+                                setShowModal(true)
+                                setCommentToDelete(commentId)
+                            }}
                         />
                     ))
                 }
             </>
         )
     }
+    <Modal show={showModal} size="md" onClose={() => setShowModal(false)} popup>
+        <ModalHeader />
+        <ModalBody>
+            <div className="text-center">
+            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Êtes-vous sûr de vouloir supprimer ce commentaire ?
+            </h3>
+            <div className="flex justify-center gap-4">
+                <Button 
+                    color="red"
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={handlerDeleteComment}
+                >
+                {
+                    loading ? 
+                    <>
+                        <Spinner size="sm" className="mr-2" />
+                        <span className="ml-2">Suppression...</span>
+                    </> 
+                    : 
+                    "Oui, supprimer"
+                }
+                </Button>
+                <Button 
+                    color="alternative" 
+                    size="sm" 
+                    onClick={() => setShowModal(false)}
+                    className="cursor-pointer"
+                >
+                Non, annuler
+                </Button>
+            </div>
+            </div>
+        </ModalBody>
+    </Modal>
     </div>
   )
 }
