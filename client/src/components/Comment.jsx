@@ -1,4 +1,12 @@
-import { Button, Spinner, Textarea } from "flowbite-react";
+import { 
+  Button, 
+  Spinner, 
+  Textarea, 
+  Modal, 
+  ModalBody, 
+  ModalHeader  
+} from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 import moment from "moment";
 import { useEffect, useState  } from "react";
 import { FaThumbsUp } from "react-icons/fa";
@@ -13,6 +21,9 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
   const [editedContent, setEditedContent] = useState(content.content)
   const [editedContentError, setEditedContentError] = useState('')
   const [loadingOnSave, setLoadingOnSave] = useState(false)
+
+  const [showModal, setShowModal] = useState(false)
+  const [deleteCommentId, setDeleteCommentId] = useState(null)
   
   /**
    * 
@@ -80,6 +91,11 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
     }finally{
       setLoadingOnSave(false)
     }
+  }
+
+  const handlerDelete = () => {
+    console.log(deleteCommentId)
+    setShowModal(false)
   }
 
   return (
@@ -181,16 +197,61 @@ const Comment = ({ content, onLike, onEdit, onSave, isEditing, cancelEdit }) => 
                 </p>
                 {
                   currentUser && (currentUser._id === content.userId || currentUser.isAdmin) && (
-                    <button
-                      type="button"
-                      className="text-gray-400 hover:text-blue-500 cursor-pointer"
-                      onClick={onEdit}
-                    >
-                      Edit
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="text-gray-400 hover:text-blue-500 cursor-pointer"
+                        onClick={onEdit}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="text-gray-400 hover:text-blue-500 cursor-pointer"
+                        onClick={
+                          () => {
+                            setShowModal(true)
+                            setDeleteCommentId(content._id)
+                          }
+                        }
+                        >
+                          Delete
+                      </button>
+                    </>
                   )
                 }
               </div>
+
+              <Modal show={showModal} size="md" onClose={() => setShowModal(false)} popup>
+                <ModalHeader />
+                <ModalBody>
+                  <div className="text-center">
+                    <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+                    <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                      Êtes-vous sûr de vouloir supprimer ce post ?
+                    </h3>
+                    <div className="flex justify-center gap-4">
+                      <Button 
+                        color="red"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={handlerDelete}
+                        >
+                        Oui, supprimer
+                      </Button>
+                      <Button 
+                        color="alternative" 
+                        size="sm" 
+                        onClick={() => setShowModal(false)}
+                        className="cursor-pointer"
+                        >
+                        Non, annuler
+                      </Button>
+                    </div>
+                  </div>
+                </ModalBody>
+              </Modal>
+
             </>
           }
         </div>
