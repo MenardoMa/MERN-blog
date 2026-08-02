@@ -13,6 +13,8 @@ const CommentSection = ({ postId }) => {
     const [loading, setLoading] = useState(false)
     const [getComment, setGetComment] = useState([])
 
+    const [editingCommentId, setEditingCommentId] = useState(null)
+
     const navigation = useNavigate()
 
     /**
@@ -132,6 +134,28 @@ const CommentSection = ({ postId }) => {
 
     }
 
+    const openEdit = (id) => {
+        setEditingCommentId(id);
+    }
+
+    /**
+     * Change value lors de l'edit
+     * 
+     * @param {*} content 
+     * @param {*} editedContent 
+     */
+    const saveEdit = (comment, editedContent) => {
+        setGetComment(prev =>
+            prev.map(c =>
+                c._id === comment._id
+                    ? { ...c, content: editedContent }
+                    : c
+            )
+        );
+
+        setEditingCommentId(null);
+    }
+
     return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {
@@ -229,6 +253,10 @@ const CommentSection = ({ postId }) => {
                             key={key}
                             content={comment}
                             onLike={handlerLike}
+                            onEdit={() => openEdit(comment._id)}
+                            onSave={saveEdit}
+                            isEditing={editingCommentId === comment._id}
+                            cancelEdit={() => setEditingCommentId(null)}
                         />
                     ))
                 }
