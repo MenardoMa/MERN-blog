@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import "react-quill-new/dist/quill.snow.css";
 import CallToAction from "../components/CallToAction";
 import CommentSection from "../components/CommentSection";
+import PostCard from "../components/PostCard";
 
 const PostPage = () => {
   const { postSlug } = useParams()
@@ -11,6 +12,14 @@ const PostPage = () => {
   const [error, setError] = useState(false)
   const [post, setPost] = useState(null)
 
+  const [recentPosts, setRecentPosts] = useState([])
+  const [loadingRecentPosts, setLoadingRecentPosts] = useState(true);
+
+  /**
+   * 
+   * Get Post, Par rapport a son slug
+   * 
+   */
   useEffect(() => {
     
     const fetchPost = async () => {
@@ -26,10 +35,11 @@ const PostPage = () => {
 
             if(res.ok){
                 setPost(data.posts[0])
-                setError(true)
+                setError(false)
             }
 
         } catch (error) {
+            console.log(error.message)
            setError(true)
         }finally{
             setLoading(false)
@@ -39,6 +49,40 @@ const PostPage = () => {
     fetchPost()
 
   }, [postSlug])
+
+  /**
+   * Recent Posts
+   * 
+   */
+    useEffect(() => {
+        
+        if (!post) return;
+
+        const fetchRecentPosts = async () => {
+            
+            setLoadingRecentPosts(true);
+            
+            try {
+            const res = await fetch(`/api/post/getPosts?limit=4`);
+            const data = await res.json();
+
+            if (res.ok) {
+                setRecentPosts(
+                data.posts
+                    .filter((p) => p._id !== post._id)
+                    .slice(0, 3)
+                );
+            }
+            } catch (error) {
+                console.log(error.message);
+            } finally {
+                setLoadingRecentPosts(false);
+            }
+        };
+
+        fetchRecentPosts();
+    }, [post]);
+
 
     return (
     <>
@@ -85,6 +129,33 @@ const PostPage = () => {
                         <CallToAction />
                     </div>
                     <CommentSection postId={post?._id} />
+
+                    {/* Recent Posts */}
+                    <div className="flex flex-col items-center mb-5">
+                        <h1 className="mt-5 text-xl font-semibold">Articles récents</h1>
+
+                        <div className="mt-5 flex flex-col flex-wrap justify-center gap-4 sm:flex-row sm:gap-6">
+                            {loadingRecentPosts
+                            ? [...Array(3)].map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="w-full sm:w-[400px] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm animate-pulse dark:border-gray-700 dark:bg-gray-800"
+                                >
+                                    <div className="h-52 w-full bg-gray-300 dark:bg-gray-700" />
+
+                                    <div className="flex flex-col gap-3 p-5">
+                                    <div className="h-6 w-24 rounded-full bg-gray-300 dark:bg-gray-700" />
+                                    <div className="h-6 w-3/4 rounded bg-gray-300 dark:bg-gray-700" />
+                                    <div className="mt-2 h-10 w-32 rounded-md bg-gray-300 dark:bg-gray-700" />
+                                    </div>
+                                </div>
+                                ))
+                            : recentPosts.map((post) => (
+                                <PostCard key={post._id} post={post} />
+                                ))}
+                        </div>
+                    </div>
+                    {/* Recent Posts */}
                 </main>
             )
         }
