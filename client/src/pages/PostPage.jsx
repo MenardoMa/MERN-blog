@@ -20,35 +20,35 @@ const PostPage = () => {
    * Get Post, Par rapport a son slug
    * 
    */
-  useEffect(() => {
-    
-    const fetchPost = async () => {
-        try {
-            setLoading(true)
-            const res = await fetch(`/api/post/getPosts?slug=${postSlug}`)
-            const data = await res.json()
+    useEffect(() => {
+        
+        const fetchPost = async () => {
+            try {
+                setLoading(true)
+                const res = await fetch(`/api/post/getPosts?slug=${postSlug}`)
+                const data = await res.json()
 
-            if(!res.ok){
-                setError(true)
-                return
+                if(!res.ok){
+                    setError(true)
+                    return
+                }
+
+                if(res.ok){
+                    setPost(data.posts[0])
+                    setError(false)
+                }
+
+            } catch (error) {
+                console.log(error.message)
+            setError(true)
+            }finally{
+                setLoading(false)
             }
-
-            if(res.ok){
-                setPost(data.posts[0])
-                setError(false)
-            }
-
-        } catch (error) {
-            console.log(error.message)
-           setError(true)
-        }finally{
-            setLoading(false)
         }
-    }
 
-    fetchPost()
+        fetchPost()
 
-  }, [postSlug])
+    }, [postSlug])
 
   /**
    * Recent Posts

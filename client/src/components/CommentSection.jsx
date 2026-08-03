@@ -363,7 +363,7 @@ const CommentSection = ({ postId }) => {
                                 size="sm"
                                 onClick={loadMoreComments}
                                 disabled={loadingMore}
-                                className="cursor-pointern"
+                                className="cursor-pointer"
                             >
                                 {loadingMore ? (
                                     <>
