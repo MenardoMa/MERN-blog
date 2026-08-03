@@ -26,6 +26,9 @@ const CommentSection = ({ postId }) => {
     const [showModal, setShowModal] = useState(false)
     const [commentToDelete, setCommentToDelete] = useState(null)
 
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     const navigation = useNavigate()
 
@@ -88,15 +91,18 @@ const CommentSection = ({ postId }) => {
     useEffect(() => {
         const fetchComment = async () => {
             try {
-                const res = await fetch(`/api/comment/getPostComments/${postId}`)
+                const res = await fetch( `/api/comment/getPostComments/${postId}?page=1&limit=3`)
                 const data = await res.json()
 
                 if(!res.ok){
                     console.log(data.message)
+                    return
                 }
 
                 if(res.ok){
-                    setGetComment(data)
+                    setGetComment(data.comments);
+                    setHasMore(data.hasMore);
+                    setPage(1);
                 }
                 
             } catch (error) {
@@ -105,6 +111,38 @@ const CommentSection = ({ postId }) => {
         }
         fetchComment()
     }, [postId])
+
+    /**
+     * Show More Comment
+     * 
+     * @returns 
+     */
+    const loadMoreComments = async () => {
+
+        try {
+
+            setLoadingMore(true);
+
+            const nextPage = page + 1;
+            const res = await fetch(
+                `/api/comment/getPostComments/${postId}?page=${nextPage}&limit=3`
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) return;
+
+            setGetComment(prev => [...prev, ...data.comments]);
+            setHasMore(data.hasMore);
+            setPage(nextPage);
+
+        } catch (error) {
+            console.log(error.message);
+        } finally {
+            setLoadingMore(false);
+        }
+
+    };
 
     /**
      * Like comment
@@ -146,6 +184,10 @@ const CommentSection = ({ postId }) => {
 
     }
 
+    /**
+     * Edit Comment
+     * @param {*} id 
+     */
     const openEdit = (id) => {
         setEditingCommentId(id);
     }
@@ -296,9 +338,9 @@ const CommentSection = ({ postId }) => {
                     </div>
                 </div>
                 {
-                    getComment.map((comment, key) => (
+                    getComment.map((comment) => (
                         <Comment
-                            key={key}
+                            key={comment._id}
                             content={comment}
                             onLike={handlerLike}
                             onEdit={() => openEdit(comment._id)}
@@ -312,6 +354,30 @@ const CommentSection = ({ postId }) => {
                         />
                     ))
                 }
+
+                {
+                    hasMore && (
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                outline
+                                size="sm"
+                                onClick={loadMoreComments}
+                                disabled={loadingMore}
+                                className="cursor-pointern"
+                            >
+                                {loadingMore ? (
+                                    <>
+                                        <Spinner size="sm" className="mr-2" />
+                                        Chargement...
+                                    </>
+                                ) : (
+                                    "Voir plus de commentaires"
+                                )}
+                            </Button>
+                        </div>
+                    )
+                }
+
             </>
         )
     }

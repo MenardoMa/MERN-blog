@@ -49,9 +49,23 @@ export const getPostComment = async (req, res, next) => {
     try {
         
         const { postId } = req.params;
+        const page = Number(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3;
+
         const comments = await Comment.find({ postId })
-                                      .sort({ createdAt: -1 })
-        res.status(201).json(comments)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const totalComments = await Comment.countDocuments({ postId });
+
+        res.status(200).json({
+            comments,
+            totalComments,
+            currentPage: page,
+            totalPages: Math.ceil(totalComments / limit),
+            hasMore: page * limit < totalComments,
+        });
 
     } catch (error) {
         next(errorHandler(500, "Une erreur interne est survenue. " + error.message))
