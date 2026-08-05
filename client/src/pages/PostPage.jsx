@@ -7,6 +7,7 @@ import CommentSection from "../components/CommentSection";
 import PostCard from "../components/PostCard";
 
 const PostPage = () => {
+  
   const { postSlug } = useParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
