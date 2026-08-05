@@ -40,13 +40,13 @@ const DashSidebar = () => {
       <SidebarItems>
         <SidebarItemGroup className="flex flex-col gap-1">
           {
-            currentUser.isAdmin && 
+            currentUser && currentUser.isAdmin && 
             <>
               <SidebarItem
                 as={Link}
                 to="/dashboard?tab=dash"
                 icon={HiDocumentText}
-                active={tab === "dash"}
+                active={tab === "dash" || !tab}
               >
                 Dashboard        
               </SidebarItem>
@@ -91,10 +91,6 @@ const DashSidebar = () => {
               </SidebarItem>
             </>
           }
-          
-          <SidebarItem icon={HiArrowSmRight}  className="cursor-pointer">
-            Profile
-          </SidebarItem>
         </SidebarItemGroup>
       </SidebarItems>
     </Sidebar>
