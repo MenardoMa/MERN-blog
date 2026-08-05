@@ -100,7 +100,7 @@ const DashComment = () => {
 
     try {
       
-      const res = await fetch(`/api/user/admin/delete/${commentIDToDelete}`, {
+      const res = await fetch(`/api/comment/deleteComment/${commentIDToDelete}`, {
         method: "DELETE"
       })
 
@@ -111,8 +111,6 @@ const DashComment = () => {
       }else{
         setComment((prev) => prev.filter((post) => post._id != commentIDToDelete ))
       }
-
-      console.log(data.message)
 
     } catch (error) {
       console.log(error)
