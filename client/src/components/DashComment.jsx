@@ -40,13 +40,13 @@ const DashComment = () => {
       setLoadingComment(true);
 
       try {
-        const res = await fetch(`/api/comment/getPostComments`);
+        const res = await fetch(`/api/comment/getComments`);
         const data = await res.json();
 
         if (res.ok) {
-          setComment(data.users);
+          setComment(data.comments);
 
-          if (data.users.length < 9) {
+          if (data.comments.length < 9) {
             setShowMore(false);
           }
         }
@@ -134,11 +134,11 @@ const DashComment = () => {
           <Table hoverable className="shadow-md">
             <TableHead>
               <TableRow>
-                <TableHeadCell>Date Create</TableHeadCell>
-                <TableHeadCell>User image</TableHeadCell>
-                <TableHeadCell>Username</TableHeadCell>
-                <TableHeadCell>Email</TableHeadCell>
-                <TableHeadCell>Admin</TableHeadCell>
+                <TableHeadCell>Date UpdatedAt</TableHeadCell>
+                <TableHeadCell>Comment Content</TableHeadCell>
+                <TableHeadCell>Nombre of likes</TableHeadCell>
+                <TableHeadCell>Post Id</TableHeadCell>
+                <TableHeadCell>User Id</TableHeadCell>
                 <TableHeadCell>Delete</TableHeadCell>
               </TableRow>
             </TableHead>
@@ -147,26 +147,20 @@ const DashComment = () => {
               {comment.map((comment) => (
                 <TableRow key={comment._id}>
                   <TableCell>
-                    {new Date(comment.createdAt).toLocaleDateString()}
+                    {new Date(comment.updatedAt).toLocaleDateString()}
                   </TableCell>
 
                   <TableCell>
-                      <img
-                        src={comment.profilePicture}
-                        alt={comment.username}
-                        className="w-20 h-20 object-cover bg-gray-500 border border-gray-500"
-                      />
+                      {comment.content}
                   </TableCell>
 
                   <TableCell>
-                      {comment.username}
+                      {comment.numberOfLikes}
                   </TableCell>
 
-                  <TableCell>{comment.email}</TableCell>
+                  <TableCell>{comment.postId}</TableCell>
                   <TableCell>
-                    {
-                        comment.isAdmin ? (<FaCheck/>) : (<FaTimes />)
-                    }
+                    { comment.userId }
                 </TableCell>
                   <TableCell
                     className="font-medium text-red-500 hover:underline cursor-pointer"
@@ -203,7 +197,7 @@ const DashComment = () => {
                 <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
 
                 <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                  Êtes-vous sûr de vouloir supprimer cet user ?
+                  Êtes-vous sûr de vouloir supprimer ce commentaire ?
                 </h3>
 
                 <div className="flex justify-center gap-4">
@@ -236,7 +230,7 @@ const DashComment = () => {
         </div>
       ) : (
         <div className="flex justify-center flex-col mx-auto gap-4 py-10">
-          <p className="text-gray-500">Vous n'avez pas de users.</p>
+          <p className="text-gray-500">Vous n'avez pas des commentaires.</p>
         </div>
       )}
     </>
