@@ -7,6 +7,7 @@ import {
 import { 
   HiArrowSmRight, 
   HiDocumentText, 
+  HiOutlineChatAlt, 
   HiOutlineUserGroup, 
   HiUser 
 } from "react-icons/hi";
@@ -66,6 +67,14 @@ const DashSidebar = () => {
                 active={tab === "users"}
               >
                 User        
+              </SidebarItem>
+              <SidebarItem
+                as={Link}
+                to="/dashboard?tab=comment"
+                icon={HiOutlineChatAlt}
+                active={tab === "comment"}
+              >
+                Comments        
               </SidebarItem>
             </>
           }
