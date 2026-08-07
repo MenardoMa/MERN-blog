@@ -13,12 +13,13 @@ import {
 } from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from "../redux/theme/themeSlice.js"
 
 import { signoutSuccess } from "../redux/user/userSlice.js"
+import { useEffect, useState } from "react";
 
 const Header = () => {
 
@@ -26,6 +27,22 @@ const Header = () => {
   const dispatch = useDispatch()
   const { currentUser } = useSelector(state => state.user )
   const { theme } = useSelector(state => state.theme)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const location = useLocation()
+  const navigation = useNavigate()
+
+  useEffect(() => {
+
+    const urlParams = new URLSearchParams(location.search)
+    const searchTermFromUrl = urlParams.get('search')
+
+    if(searchTermFromUrl){
+        setSearchTerm(searchTermFromUrl)
+    }
+
+  }, [location.search])
+
 
     // Logout
   const handlerSignOut = async (e) => {
@@ -48,7 +65,16 @@ const Header = () => {
     } catch (error) {
       console.log('Une erreur est survenue ' + error.message)
     }
-  } 
+  }
+
+    //Handler Submit Search   
+  const handlerSubmit = async (e) => {
+        e.preventDefault()
+        const urlParams = new URLSearchParams(location.search)
+        urlParams.set('searchTerm', searchTerm)
+        const searchQuery = urlParams.toString()
+        navigation(`/search?${searchQuery}`)
+  }
 
 
   return (
@@ -60,11 +86,13 @@ const Header = () => {
                 </span>
             Blog
         </Link>
-        <form action="">
+        <form action="" onSubmit={handlerSubmit}>
             <TextInput
                 type="text"
                 placeholder="Search ...."
                 rightIcon={AiOutlineSearch}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="hidden lg:inline"
             />
         </form>
